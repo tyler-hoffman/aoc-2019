@@ -15,28 +15,21 @@ class Machine:
 
         while running:
             op_code = self.code[self.pos] % 100
-            c = self.code[self.pos] // 100 % 10
-            b = self.code[self.pos] // 1000 % 10
-            a = self.code[self.pos] // 10000 % 10
-
-            param_a = code[self.pos + 1] if c == 0 else self.pos + 1
-            param_b = code[self.pos + 2] if b == 0 else self.pos + 2
-            param_c = code[self.pos + 3] if a == 0 else self.pos + 3
 
             match op_code:
                 case 1:
-                    code[param_c] = code[param_a] + code[param_b]
+                    code[self.param(3)] = code[self.param(1)] + code[self.param(2)]
                     self.pos += 4
                 case 2:
-                    code[param_c] = code[param_a] * code[param_b]
+                    code[self.param(3)] = code[self.param(1)] * code[self.param(2)]
                     self.pos += 4
                 case 3:
                     assert self.get_input is not None
-                    code[param_a] = self.get_input()
+                    code[self.param(1)] = self.get_input()
                     self.pos += 2
                 case 4:
                     assert self.send_output is not None
-                    self.send_output(code[param_a])
+                    self.send_output(code[self.param(1)])
                     self.pos += 2
                 case 99:
                     running = False
@@ -46,7 +39,7 @@ class Machine:
     def param(self, offset: int) -> int:
         code = self.code
         pos = self.pos
-        mode = code[pos] // (10 ** (4 - offset)) % 10
+        mode = code[pos] // (10 ** (offset + 1)) % 10
 
         match mode:
             case 0:

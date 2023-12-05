@@ -31,20 +31,38 @@ class Machine:
                     assert self.send_output is not None
                     self.send_output(code[self.param(1)])
                     self.pos += 2
+                case 5:
+                    if code[self.param(1)]:
+                        self.pos = code[self.param(2)]
+                    else:
+                        self.pos += 3
+                case 6:
+                    if not code[self.param(1)]:
+                        self.pos = code[self.param(2)]
+                    else:
+                        self.pos += 3
+                case 7:
+                    code[self.param(3)] = (
+                        1 if code[self.param(1)] < code[self.param(2)] else 0
+                    )
+                    self.pos += 4
+                case 8:
+                    code[self.param(3)] = (
+                        1 if code[self.param(1)] == code[self.param(2)] else 0
+                    )
+                    self.pos += 4
                 case 99:
                     running = False
                 case _:
                     assert False
 
     def param(self, offset: int) -> int:
-        code = self.code
-        pos = self.pos
-        mode = code[pos] // (10 ** (offset + 1)) % 10
+        mode = self.code[self.pos] // (10 ** (offset + 1)) % 10
 
         match mode:
             case 0:
-                return code[pos + offset]
+                return self.code[self.pos + offset]
             case 1:
-                return pos + offset
+                return self.pos + offset
             case _:
                 assert False

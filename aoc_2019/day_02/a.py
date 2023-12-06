@@ -10,10 +10,11 @@ class Day02PartASolver:
 
     @property
     def solution(self) -> int:
-        self.code[1] = 12
-        self.code[2] = 2
-        self.machine.run()
-        return self.machine.code[0]
+        machine = self.machine
+        machine.memory[1] = 12
+        machine.memory[2] = 2
+        machine.run()
+        return machine.memory[0]
 
     @cached_property
     def machine(self) -> Machine:

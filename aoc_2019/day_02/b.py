@@ -18,7 +18,7 @@ class Day02PartBSolver:
                 code[2] = verb
                 machine = Machine(code)
                 machine.run()
-                if code[0] == self.target:
+                if machine.memory[0] == self.target:
                     return 100 * noun + verb
 
         assert False

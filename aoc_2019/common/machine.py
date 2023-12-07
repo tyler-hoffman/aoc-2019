@@ -50,7 +50,7 @@ class Machine:
                 case 8:
                     self.write(3, 1 if self.read(1) == self.read(2) else 0)
                     self.pos += 4
-                case 8:
+                case 9:
                     self.relative_base += self.read(1)
                     self.pos += 2
                 case 99:
@@ -72,12 +72,12 @@ class Machine:
         value = self.memory[self.pos + offset]
 
         match mode:
-            case 0:
+            case 0:  # position
                 return self.memory[value]
-            case 1:
+            case 1:  # immediate
                 return value
-            case 2:
-                return self.relative_base + value
+            case 2:  # relative
+                return self.memory[self.relative_base + value]
             case _:
                 assert False
 
@@ -85,6 +85,14 @@ class Machine:
         mode = self.memory[self.pos] // (10 ** (offset + 1)) % 10
         address = self.memory[self.pos + offset]
 
-        assert mode == 0
+        if mode != 0:
+            print("wat")
 
-        self.memory[address] = value
+        # self.memory[address] = value
+        match mode:
+            case 0:
+                self.memory[address] = value
+            case 2:
+                self.memory[self.relative_base + address] = value
+            case _:
+                assert False

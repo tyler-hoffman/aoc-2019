@@ -10,6 +10,7 @@ class Machine:
     get_input: Optional[Callable[[], int]] = None
     send_output: Optional[Callable[[int], None]] = None
     pos: int = field(default=0, init=False)
+    relative_base: int = field(default=0, init=False)
 
     def run(self) -> None:
         memory = self.memory
@@ -20,43 +21,38 @@ class Machine:
 
             match op_code:
                 case 1:
-                    memory[self.param(3)] = (
-                        memory[self.param(1)] + memory[self.param(2)]
-                    )
+                    self.write(3, self.read(1) + self.read(2))
                     self.pos += 4
                 case 2:
-                    memory[self.param(3)] = (
-                        memory[self.param(1)] * memory[self.param(2)]
-                    )
+                    self.write(3, self.read(1) * self.read(2))
                     self.pos += 4
                 case 3:
                     assert self.get_input is not None
-                    memory[self.param(1)] = self.get_input()
+                    self.write(1, self.get_input())
                     self.pos += 2
                 case 4:
                     assert self.send_output is not None
-                    self.send_output(memory[self.param(1)])
+                    self.send_output(self.read(1))
                     self.pos += 2
                 case 5:
-                    if memory[self.param(1)]:
-                        self.pos = memory[self.param(2)]
+                    if self.read(1):
+                        self.pos = self.read(2)
                     else:
                         self.pos += 3
                 case 6:
-                    if not memory[self.param(1)]:
-                        self.pos = memory[self.param(2)]
+                    if not self.read(1):
+                        self.pos = self.read(2)
                     else:
                         self.pos += 3
                 case 7:
-                    memory[self.param(3)] = (
-                        1 if memory[self.param(1)] < memory[self.param(2)] else 0
-                    )
+                    self.write(3, 1 if self.read(1) < self.read(2) else 0)
                     self.pos += 4
                 case 8:
-                    memory[self.param(3)] = (
-                        1 if memory[self.param(1)] == memory[self.param(2)] else 0
-                    )
+                    self.write(3, 1 if self.read(1) == self.read(2) else 0)
                     self.pos += 4
+                case 8:
+                    self.relative_base += self.read(1)
+                    self.pos += 2
                 case 99:
                     running = False
                 case _:
@@ -71,13 +67,24 @@ class Machine:
 
         return output
 
-    def param(self, offset: int) -> int:
+    def read(self, offset: int) -> int:
         mode = self.memory[self.pos] // (10 ** (offset + 1)) % 10
+        value = self.memory[self.pos + offset]
 
         match mode:
             case 0:
-                return self.memory[self.pos + offset]
+                return self.memory[value]
             case 1:
-                return self.pos + offset
+                return value
+            case 2:
+                return self.relative_base + value
             case _:
                 assert False
+
+    def write(self, offset: int, value: int) -> None:
+        mode = self.memory[self.pos] // (10 ** (offset + 1)) % 10
+        address = self.memory[self.pos + offset]
+
+        assert mode == 0
+
+        self.memory[address] = value

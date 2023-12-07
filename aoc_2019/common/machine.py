@@ -85,10 +85,6 @@ class Machine:
         mode = self.memory[self.pos] // (10 ** (offset + 1)) % 10
         address = self.memory[self.pos + offset]
 
-        if mode != 0:
-            print("wat")
-
-        # self.memory[address] = value
         match mode:
             case 0:
                 self.memory[address] = value

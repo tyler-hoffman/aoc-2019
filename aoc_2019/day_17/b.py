@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from functools import cached_property
+from typing import Iterable, Optional
 from aoc_2019.common.machine import Machine
 from aoc_2019.common.point import Point
 from aoc_2019.day_17.common import get_map
@@ -16,12 +17,86 @@ DIRECTIONS = [
 @dataclass
 class Day17PartBSolver:
     code: list[int]
+    debug: bool = True
 
     @property
     def solution(self) -> int:
-        path = self.whole_path
-        self.run_it()
+        function_options = list(self.get_function_options(0, []))
+        instructions = self.get_instructions(function_options)
+        instruction_stack = self.to_instruction_stack(instructions)
+
+        self.run_it(instruction_stack)
         return -1
+
+    def to_instruction_stack(self, lines: list[str]) -> list[int]:
+        together = "\n".join(lines) + "\n"
+
+        return list(reversed([ord(x) for x in together]))
+
+    def get_instructions(
+        self,
+        function_options: list[list[list[str | int]]],
+    ) -> list[str]:
+        for function_option in function_options:
+            main = self.get_main(
+                {
+                    "A": function_option[0],
+                    "B": function_option[1],
+                    "C": function_option[2],
+                }
+            )
+            if main:
+                return [
+                    ",".join(main),
+                    *[",".join([str(x) for x in f]) for f in function_option],
+                    "y" if self.debug else "n",
+                ]
+        assert False
+
+    def get_main(
+        self,
+        functions: dict[str, list[str | int]],
+        pos: int = 0,
+        so_far: list[str] = [],
+    ) -> Optional[list[str]]:
+        if pos > len(self.path):
+            return None
+        elif len(so_far) > 10:
+            return None
+        elif pos == len(self.path):
+            return so_far[:]
+        else:
+            found_match: Optional[list[str]] = None
+            for key, function in functions.items():
+                if self.path[pos : pos + len(function)] == function:
+                    so_far.append(key)
+                    match = self.get_main(functions, pos + len(function), so_far)
+                    so_far.pop()
+                    if match:
+                        found_match = match
+            return found_match
+
+    def get_function_options(
+        self,
+        pos: int,
+        found: list[list[str | int]],
+    ) -> Iterable[list[list[str | int]]]:
+        if pos >= len(self.path):
+            return
+
+        if len(found) == 3:
+            if all([len(",".join([str(x) for x in f])) <= 20 for f in found]):
+                yield found[:]
+            return
+
+        for f in found:
+            if self.path[pos : pos + len(f)] == f:
+                yield from self.get_function_options(pos + len(f), found)
+        for i in range(1, 10):
+            variation = self.path[pos : pos + i]
+            found.append(variation)
+            yield from self.get_function_options(pos + i, found)
+            found.pop()
 
     @cached_property
     def map(self) -> list[str]:
@@ -44,7 +119,7 @@ class Day17PartBSolver:
         return len(self.map)
 
     @cached_property
-    def whole_path(self) -> list[str | int]:
+    def path(self) -> list[str | int]:
         output = list[str | int]()
         pos = self.start
         direction_index = 0
@@ -74,10 +149,9 @@ class Day17PartBSolver:
 
         return output
 
-    def run_it(self) -> None:
+    def run_it(self, instruction_stack: list[int]) -> None:
         code = self.code[:]
         code[0] = 2
-        instruction_stack = get_instructions()
         chars = list[str]()
 
         def send_output(val: int) -> None:

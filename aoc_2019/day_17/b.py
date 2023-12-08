@@ -17,16 +17,13 @@ DIRECTIONS = [
 @dataclass
 class Day17PartBSolver:
     code: list[int]
-    debug: bool = True
 
     @property
     def solution(self) -> int:
         function_options = list(self.get_function_options(0, []))
         instructions = self.get_instructions(function_options)
-        instruction_stack = self.to_instruction_stack(instructions)
 
-        self.run_it(instruction_stack)
-        return -1
+        return self.run_it(instructions)
 
     def to_instruction_stack(self, lines: list[str]) -> list[int]:
         together = "\n".join(lines) + "\n"
@@ -49,7 +46,6 @@ class Day17PartBSolver:
                 return [
                     ",".join(main),
                     *[",".join([str(x) for x in f]) for f in function_option],
-                    "y" if self.debug else "n",
                 ]
         assert False
 
@@ -149,12 +145,15 @@ class Day17PartBSolver:
 
         return output
 
-    def run_it(self, instruction_stack: list[int]) -> None:
+    def debug(self, instructions: list[str]) -> None:
+        """Just for visual debugging"""
+        instructions.append("y")
+        instruction_stack = self.to_instruction_stack(instructions)
         code = self.code[:]
         code[0] = 2
         chars = list[str]()
 
-        def send_output(val: int) -> None:
+        def send_visual_output(val: int) -> None:
             char = chr(val)
             if char == "\n" and chars[-1] == "\n":
                 the_map = "".join(chars).split("\n")
@@ -165,10 +164,25 @@ class Day17PartBSolver:
 
         machine = Machine(
             code,
-            send_output=send_output,
+            send_output=send_visual_output,
             get_input=lambda: instruction_stack.pop(),
         )
         machine.run()
+
+    def run_it(self, instructions: list[str]) -> int:
+        instructions.append("n")
+        instruction_stack = self.to_instruction_stack(instructions)
+        code = self.code[:]
+        code[0] = 2
+        output_vals = list[int]()
+
+        machine = Machine(
+            code,
+            send_output=lambda x: output_vals.append(x),
+            get_input=lambda: instruction_stack.pop(),
+        )
+        machine.run()
+        return output_vals[-1]
 
     def is_scaffold(self, point: Point) -> bool:
         return (
@@ -178,21 +192,6 @@ class Day17PartBSolver:
             and point.y < self.height
             and self.map[point.y][point.x] != "."
         )
-
-
-def get_instructions() -> list[int]:
-    instructions = """
-        A,A,A,A,A,A,A,A,A,A
-        R,R,R,R,R,R,R,R,R,R
-        R
-        R
-        y
-        """.strip()
-
-    lines = [line.strip() for line in instructions.splitlines()]
-    together = "\n".join(lines) + "\n"
-
-    return list(reversed([ord(x) for x in together]))
 
 
 def solve(input: str) -> int:

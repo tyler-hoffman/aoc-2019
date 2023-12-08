@@ -1,10 +1,9 @@
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import cached_property
-from itertools import product
 from typing import Iterable
-from aoc_2019.common.machine import Machine
 from aoc_2019.common.point import Point
+from aoc_2019.day_17.common import get_map
 from aoc_2019.day_17.parser import Parser
 
 
@@ -45,11 +44,8 @@ class Day17PartASolver:
 
 
 def solve(input: str) -> int:
-    code = Parser.parse(input)
-    chars = list[str]()
-    machine = Machine(code, send_output=lambda x: chars.append(chr(x)))
-    machine.run()
-    the_map = "".join(chars).split("\n")
+    lines = Parser.parse(input)
+    the_map = get_map(lines)
     solver = Day17PartASolver(the_map)
 
     return solver.solution

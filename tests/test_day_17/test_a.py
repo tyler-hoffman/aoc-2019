@@ -3,7 +3,7 @@ from aoc_2019.day_17.from_prompt import SAMPLE_MAP, SAMPLE_OUTPUT
 
 
 def test_for_map():
-    assert Day17PartASolver(SAMPLE_MAP).solution == SAMPLE_OUTPUT  # type: ignore
+    assert Day17PartASolver(SAMPLE_MAP).solution == SAMPLE_OUTPUT
 
 
 def test_my_solution():

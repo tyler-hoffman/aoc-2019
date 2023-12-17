@@ -9,6 +9,7 @@ class Day20PartASolver:
 
     @property
     def solution(self) -> int:
+        dists = self.map.dists
         return -1
 
 

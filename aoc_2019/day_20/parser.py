@@ -31,15 +31,23 @@ class Parser:
         height = len(lines)
         for y in range(height):
             if lines[y][0] != " ":
-                output.add(Portal(lines[y][:2], Point(2 - 2, y - 2)))
+                output.add(Portal(lines[y][:2], Point(2 - 2, y - 2), outside=True))
             if lines[y][-1] != " ":
-                output.add(Portal(lines[y][-2:], Point(width - 5, y - 2)))
+                output.add(Portal(lines[y][-2:], Point(width - 5, y - 2), outside=True))
         for x in range(width):
             if lines[0][x] != " ":
-                output.add(Portal(f"{lines[0][x]}{lines[1][x]}", Point(x - 2, 2 - 2)))
+                output.add(
+                    Portal(
+                        f"{lines[0][x]}{lines[1][x]}", Point(x - 2, 2 - 2), outside=True
+                    )
+                )
             if lines[-1][x] != " ":
                 output.add(
-                    Portal(f"{lines[-1][x]}{lines[-2][x]}", Point(x - 2, height - 5))
+                    Portal(
+                        f"{lines[-1][x]}{lines[-2][x]}",
+                        Point(x - 2, height - 5),
+                        outside=True,
+                    )
                 )
         return output
 
@@ -56,6 +64,7 @@ class Parser:
                     Portal(
                         lines[y][donut_width : donut_width + 2],
                         Point(donut_width - 3, y - 2),
+                        outside=False,
                     )
                 )
             if lines[y][-donut_width - 1] != " ":
@@ -63,6 +72,7 @@ class Parser:
                     Portal(
                         lines[y][-donut_width - 2 : -donut_width],
                         Point(width - donut_width - 1, y - 2),
+                        outside=False,
                     )
                 )
         for x in range(donut_width, width - donut_width):
@@ -71,6 +81,7 @@ class Parser:
                     Portal(
                         f"{lines[donut_width][x]}{lines[donut_width+1][x]}",
                         Point(x - 2, donut_width - 3),
+                        outside=False,
                     )
                 )
             if lines[-donut_width - 1][x] != " ":
@@ -78,6 +89,7 @@ class Parser:
                     Portal(
                         f"{lines[-donut_width - 2][x]}{lines[-donut_width - 1][x]}",
                         Point(x - 2, height - donut_width - 1),
+                        outside=False,
                     )
                 )
         return output

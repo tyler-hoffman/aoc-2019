@@ -61,4 +61,4 @@ YN......#               VT..#....QG
 """
 
 SAMPLE_SOLUTION_1 = 23
-SAMPLE_SOLUTION_2 = 618
+SAMPLE_SOLUTION_2 = 58

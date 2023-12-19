@@ -1,16 +1,25 @@
+from __future__ import annotations
 from dataclasses import dataclass
-from functools import cached_property
+from functools import cached_property, total_ordering
 from queue import PriorityQueue
-from typing import Iterator, Mapping
+from typing import Mapping, Optional
 
 from aoc_2019.common.point import Point
 
 
+@total_ordering
 @dataclass(frozen=True)
 class Portal:
     label: str
     point: Point
     outside: bool
+
+    def __lt__(self, other: Portal) -> bool:
+        return (self.label, self.outside) < (other.label, other.outside)
+
+    @property
+    def shadow(self) -> Portal:
+        return Portal(self.label, self.point, not self.outside)
 
 
 @dataclass(frozen=True)
@@ -22,6 +31,23 @@ class Map:
     def __post_init__(self) -> None:
         assert all(p.point in self.points for p in self.outer_portals.values())
         assert all(p.point in self.points for p in self.inner_portals.values())
+
+    @cached_property
+    def start(self) -> Portal:
+        return next(p for p in self.outer_portals.values() if p.label == "AA")
+
+    @cached_property
+    def goal(self) -> Portal:
+        return next(p for p in self.outer_portals.values() if p.label == "ZZ")
+
+    @cached_property
+    def shadows(self) -> Mapping[Portal, Portal]:
+        output = dict[Portal, Portal]()
+        for inner in self.inner_portals.values():
+            outer = self.outer_portals[inner.label]
+            output[inner] = outer
+            output[outer] = inner
+        return output
 
     @cached_property
     def portals_by_point(self) -> Mapping[Point, Portal]:

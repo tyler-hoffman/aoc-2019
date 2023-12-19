@@ -44,7 +44,7 @@ class Parser:
             if lines[-1][x] != " ":
                 output.add(
                     Portal(
-                        f"{lines[-1][x]}{lines[-2][x]}",
+                        f"{lines[-2][x]}{lines[-1][x]}",
                         Point(x - 2, height - 5),
                         outside=True,
                     )
@@ -71,7 +71,7 @@ class Parser:
                 output.add(
                     Portal(
                         lines[y][-donut_width - 2 : -donut_width],
-                        Point(width - donut_width - 1, y - 2),
+                        Point(width - donut_width - 2, y - 2),
                         outside=False,
                     )
                 )
@@ -88,7 +88,7 @@ class Parser:
                 output.add(
                     Portal(
                         f"{lines[-donut_width - 2][x]}{lines[-donut_width - 1][x]}",
-                        Point(x - 2, height - donut_width - 1),
+                        Point(x - 2, height - donut_width - 2),
                         outside=False,
                     )
                 )
